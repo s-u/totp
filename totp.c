@@ -1,4 +1,4 @@
-/* Implementation of the TOTP (Time-base One-Time Password) algorithm
+/* Implementation of the TOTP (Time-based One-Time Password) algorithm
    as defined by RFC 6238 (which is turn uses RFC 4226 and RFC 2104),
    with base32-encoded keys (RFC 3548) as used by most 2-Factor
    Authentication (2FA) programs/apps.
@@ -134,6 +134,7 @@ int main(int ac, char **av) {
     while (++i < ac)
 	if (av[i][0] == '-')
 	    switch(av[i][1]) {
+	    case 0: fn = "-"; break;
 	    case 't': if (av[i][2]) tv = av[i] + 2; else if (++i < ac) tv = av[i]; break;
 	    case 'k': if (++i < ac) k32 = av[i]; break;
 	    case 'd': if (av[i][2]) dig = atoi(av[i] + 2); else if (++i < ac) dig = atoi(av[i]); break;
@@ -147,7 +148,8 @@ int main(int ac, char **av) {
 "        %s -h\n\n"
 " By default current and next token are printed with\n"
 " expiry information. Use -1 to just print the current token.\n"
-		       "\n", av[0], av[0], av[0]);
+" <key-file> can be - for key input on stdin.\n"
+"\n", av[0], av[0], av[0]);
 		return 0;
 	    } else if (!fn && !k32)
 	    fn = av[i];
@@ -169,7 +171,7 @@ int main(int ac, char **av) {
     unsigned char key[64];
     char buf[64];
     if (fn) {
-	FILE *f = fopen(fn, "r");
+	FILE *f = (fn[0] == '-' && !fn[1]) ? stdin: fopen(fn, "r");
 	if (!f) {
 	    fprintf(stderr, "Error: cannot open %s\n", fn);
 	    return 1;
