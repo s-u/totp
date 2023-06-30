@@ -25,6 +25,14 @@
 unsigned char *hmac_sha1(unsigned char *key, size_t key_len, const unsigned char *tt, unsigned char h[20]);
 
 #ifndef HAVE_HMAC_SHA1
+/* use system library on macOS */
+#ifdef __APPLE__
+#include <CommonCrypto/CommonHMAC.h>
+unsigned char *hmac_sha1(unsigned char *key, size_t key_len, const unsigned char *tt, unsigned char h[20]) {
+    CCHmac(kCCHmacAlgSHA1, key, key_len, tt, 8, h);
+    return h;
+}
+#else
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 
@@ -33,6 +41,7 @@ unsigned char *hmac_sha1(unsigned char *key, size_t key_len, const unsigned char
     unsigned int hlen = 20;
     return HMAC(EVP_sha1(), key, key_len, tt, 8, h, &hlen);
 }
+#endif
 #endif
 
 /* --- cut here - actual implementation --- */
